@@ -16,7 +16,9 @@ import {
   isMinuteInputValid,
   isSecondInputValid,
   isInputLimitValid,
-  isInputValid
+  isInputValid,
+  isValueEmpty,
+  isInputEmpty
 } from '../../timepicker/timepicker.utils';
 
 const controls: TimepickerComponentState = {
@@ -55,6 +57,44 @@ function modelTime(hours: string | number,
     isPM: PM || null
   };
 }
+
+describe('Runtime coverage. Utils: Timepicker heira', () => {
+  it('value should be empty', () => {
+    expect(isValueEmpty('')).toBeTruthy();
+  });
+
+  it('value should be empty', () => {
+    expect(isValueEmpty(null)).toBeTruthy();
+  });
+
+  it('value should not be empty', () => {
+    expect(isValueEmpty(' ')).toBeFalsy();
+  });
+
+  it('value should not be empty', () => {
+    expect(isValueEmpty('12')).toBeFalsy();
+  });
+
+  it('input should be empty', () => {
+    expect(isInputEmpty('', '', '')).toBeTruthy();
+  });
+
+  it('input should be empty', () => {
+    expect(isInputEmpty('', null, undefined)).toBeTruthy();
+  });
+
+  it('input should not be empty', () => {
+    expect(isInputEmpty('12', null, null)).toBeFalsy();
+  });
+
+  it('input should not be empty', () => {
+    expect(isInputEmpty(null, '12', null)).toBeFalsy();
+  });
+
+  it('input should not be empty', () => {
+    expect(isInputEmpty(null, null, '12')).toBeFalsy();
+  });
+});
 
 // todo: OMG
 xdescribe('Runtime coverage. Utils: Timepicker', () => {

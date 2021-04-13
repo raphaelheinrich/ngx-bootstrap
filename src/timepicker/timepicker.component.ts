@@ -33,7 +33,9 @@ import {
   isHourInputValid,
   isMinuteInputValid,
   isSecondInputValid,
-  isInputLimitValid
+  isInputLimitValid,
+  isValueEmpty,
+  isInputEmpty
 } from './timepicker.utils';
 
 import { Subscription } from 'rxjs';
@@ -166,29 +168,41 @@ export class TimepickerComponent
     Object.assign(this, _config);
 
     this.timepickerSub = _store
-      .select(state => state.value)
-      .subscribe((value: Date) => {
-        // update UI values if date changed
-        this._renderTime(value);
-        this.onChange(value);
+    .select(state => state.value)
+    .subscribe((value: Date) => {
+      // update UI values if date changed
+      this._renderTime(value);
+      this.onChange(value);
 
-        this._store.dispatch(
-          this._timepickerActions.updateControls(getControlsValue(this))
-        );
-      });
+      this._store.dispatch(
+        this._timepickerActions.updateControls(getControlsValue(this))
+      );
+    });
 
     _store
-      .select(state => state.controls)
-      .subscribe((controlsState: TimepickerControls) => {
-        this.isValid.emit(isInputValid(this.hours, this.minutes, this.seconds, this.isPM()));
-        Object.assign(this, controlsState);
-        _cd.markForCheck();
-      });
+    .select(state => state.controls)
+    .subscribe((controlsState: TimepickerControls) => {
+      this.isValid.emit(isInputValid(this.hours, this.minutes, this.seconds, this.isPM()));
+      Object.assign(this, controlsState);
+      _cd.markForCheck();
+    });
   }
 
   resetValidation(): void {
     this.invalidHours = false;
     this.invalidMinutes = false;
+    this.invalidSeconds = false;
+  }
+
+  resetHoursValidation(): void {
+    this.invalidHours = false;
+  }
+
+  resetMinutesValidation(): void {
+    this.invalidMinutes = false;
+  }
+
+  resetSecondsValidation(): void {
     this.invalidSeconds = false;
   }
 
@@ -211,29 +225,29 @@ export class TimepickerComponent
   }
 
   changeHours(step: number, source: TimeChangeSource = ''): void {
-    this.resetValidation();
+    this.resetHoursValidation();
     this._store.dispatch(this._timepickerActions.changeHours({ step, source }));
   }
 
   changeMinutes(step: number, source: TimeChangeSource = ''): void {
-    this.resetValidation();
+    this.resetMinutesValidation();
     this._store.dispatch(
       this._timepickerActions.changeMinutes({ step, source })
     );
   }
 
   changeSeconds(step: number, source: TimeChangeSource = ''): void {
-    this.resetValidation();
+    this.resetSecondsValidation();
     this._store.dispatch(
       this._timepickerActions.changeSeconds({ step, source })
     );
   }
 
   updateHours(hours: string): void {
-    this.resetValidation();
+    this.resetHoursValidation();
     this.hours = hours;
 
-    const isValid = isHourInputValid(this.hours, this.isPM()) && this.isValidLimit();
+    const isValid = isValueEmpty(hours) || (isHourInputValid(this.hours, this.isPM()) && this.isValidLimit());
 
     if (!isValid) {
       this.invalidHours = true;
@@ -247,10 +261,10 @@ export class TimepickerComponent
   }
 
   updateMinutes(minutes: string) {
-    this.resetValidation();
+    this.resetMinutesValidation();
     this.minutes = minutes;
 
-    const isValid = isMinuteInputValid(this.minutes) && this.isValidLimit();
+    const isValid = isValueEmpty(minutes) || (isMinuteInputValid(this.minutes) && this.isValidLimit());
 
     if (!isValid) {
       this.invalidMinutes = true;
@@ -264,10 +278,10 @@ export class TimepickerComponent
   }
 
   updateSeconds(seconds: string) {
-    this.resetValidation();
+    this.resetSecondsValidation();
     this.seconds = seconds;
 
-    const isValid = isSecondInputValid(this.seconds) && this.isValidLimit();
+    const isValid = isValueEmpty(seconds) || (isSecondInputValid(this.seconds) && this.isValidLimit());
 
     if (!isValid) {
       this.invalidSeconds = true;
@@ -292,6 +306,14 @@ export class TimepickerComponent
   _updateTime() {
     const _seconds = this.showSeconds ? this.seconds : void 0;
     const _minutes = this.showMinutes ? this.minutes : void 0;
+
+    if (isInputEmpty(this.hours, _minutes, _seconds)) {
+      this.isValid.emit(true);
+      this.onChange(null);
+
+      return;
+    }
+
     if (!isInputValid(this.hours, _minutes, _seconds, this.isPM())) {
       this.isValid.emit(false);
       this.onChange(null);

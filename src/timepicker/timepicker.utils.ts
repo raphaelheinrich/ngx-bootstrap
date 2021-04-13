@@ -201,3 +201,18 @@ export function isInputValid(
     && isMinuteInputValid(minutes)
     && isSecondInputValid(seconds);
 }
+
+export function isInputEmpty(
+  hours: string,
+  minutes: string,
+  seconds: string
+): boolean {
+  return isValueEmpty(hours)
+    && isValueEmpty(minutes)
+    && isValueEmpty(seconds);
+}
+
+export function isValueEmpty(value: string): boolean {
+  return !value || value.length === 0;
+}
+
