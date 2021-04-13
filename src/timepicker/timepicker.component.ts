@@ -182,7 +182,9 @@ export class TimepickerComponent
     _store
     .select(state => state.controls)
     .subscribe((controlsState: TimepickerControls) => {
-      this.isValid.emit(isInputValid(this.hours, this.minutes, this.seconds, this.isPM()));
+      this.isValid.emit(
+        isInputEmpty(this.hours, this.minutes, this.seconds)
+        || isInputValid(this.hours, this.minutes, this.seconds, this.isPM()));
       Object.assign(this, controlsState);
       _cd.markForCheck();
     });
