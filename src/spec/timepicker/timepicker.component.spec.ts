@@ -1106,5 +1106,77 @@ describe('Component: TimepickerComponent', () => {
         expect(inputSeconds.value).toBeLessThan(60);
       });
     }));
+
+    it('should clear model if hours input is empty', () => {
+      const methodSpy = spyOn(component, 'onChange').and.callThrough();
+      spyOn(component.isValid, 'emit').and.stub();
+      component.hours = '10';
+
+      component.updateHours('');
+      fixture.detectChanges();
+
+      expect(methodSpy).toHaveBeenCalledWith(null);
+      expect(component.isValid.emit).toHaveBeenCalledWith(true);
+    });
+
+    it('should clear model if minutes input is empty', () => {
+      const methodSpy = spyOn(component, 'onChange').and.callThrough();
+      spyOn(component.isValid, 'emit').and.stub();
+      component.showMinutes = true;
+      component.minutes = '10';
+
+      component.updateMinutes('');
+      fixture.detectChanges();
+
+      expect(methodSpy).toHaveBeenCalledWith(null);
+      expect(component.isValid.emit).toHaveBeenCalledWith(true);
+    });
+
+    it('should clear model if second input is empty', () => {
+      const methodSpy = spyOn(component, 'onChange').and.callThrough();
+      spyOn(component.isValid, 'emit').and.stub();
+      component.showSeconds = true;
+      component.seconds = '10';
+
+      component.updateSeconds('');
+      fixture.detectChanges();
+
+      expect(methodSpy).toHaveBeenCalledWith(null);
+      expect(component.isValid.emit).toHaveBeenCalledWith(true);
+    });
+
+    it('should clear model if hours input is empty and emit false', () => {
+      const methodSpy = spyOn(component, 'onChange').and.callThrough();
+      spyOn(component.isValid, 'emit').and.stub();
+      component.showMinutes = true;
+      component.showSeconds = true;
+
+      component.writeValue(testTime(10, 10, 10));
+      fixture.detectChanges();
+
+      component.updateHours('');
+      fixture.detectChanges();
+
+      expect(methodSpy).toHaveBeenCalledWith(null);
+      expect(component.isValid.emit).toHaveBeenCalledWith(false);
+    });
+
+    it('should clear model if hours, minutes and seconds input is empty and emit true', () => {
+      const methodSpy = spyOn(component, 'onChange').and.callThrough();
+      spyOn(component.isValid, 'emit').and.stub();
+      component.showMinutes = true;
+      component.showSeconds = true;
+
+      component.writeValue(testTime(10, 10, 10));
+      fixture.detectChanges();
+
+      component.updateHours('');
+      component.updateMinutes('');
+      component.updateSeconds('');
+      fixture.detectChanges();
+
+      expect(methodSpy).toHaveBeenCalledWith(null);
+      expect(component.isValid.emit).toHaveBeenCalledWith(true);
+    });
   });
 });
