@@ -1195,11 +1195,11 @@ describe('Component: TimepickerComponent', () => {
 
       inputHours = getInputElements(fixture)[0];
       (inputHours as HTMLInputElement).value = '';
-      component.updateSeconds(inputHours);
+      component.updateHours(inputHours);
 
       inputMinutes = getInputElements(fixture)[1];
       (inputMinutes as HTMLInputElement).value = '';
-      component.updateSeconds(inputMinutes);
+      component.updateMinutes(inputMinutes);
 
       inputSeconds = getInputElements(fixture)[2];
       (inputSeconds as HTMLInputElement).value = '';
