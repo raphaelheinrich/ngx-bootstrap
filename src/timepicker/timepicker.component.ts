@@ -32,7 +32,9 @@ import {
   isSecondInputValid,
   isValidDate,
   padNumber,
-  parseTime
+  parseTime,
+  isValueEmpty,
+  isInputEmpty
 } from './timepicker.utils';
 
 export const TIMEPICKER_CONTROL_VALUE_ACCESSOR: ControlValueAccessorModel = {
@@ -171,7 +173,9 @@ export class TimepickerComponent
     _store
       .select(state => state.controls)
       .subscribe((controlsState: TimepickerControls) => {
-        this.isValid.emit(isInputValid(this.hours, this.minutes, this.seconds, this.isPM()));
+      this.isValid.emit(
+        isInputEmpty(this.hours, this.minutes, this.seconds)
+        || isInputValid(this.hours, this.minutes, this.seconds, this.isPM()));
         Object.assign(this, controlsState);
         _cd.markForCheck();
       });
@@ -189,6 +193,18 @@ export class TimepickerComponent
   resetValidation(): void {
     this.invalidHours = false;
     this.invalidMinutes = false;
+    this.invalidSeconds = false;
+  }
+
+  resetHoursValidation(): void {
+    this.invalidHours = false;
+  }
+
+  resetMinutesValidation(): void {
+    this.invalidMinutes = false;
+  }
+
+  resetSecondsValidation(): void {
     this.invalidSeconds = false;
   }
 
@@ -211,29 +227,29 @@ export class TimepickerComponent
   }
 
   changeHours(step: number, source: TimeChangeSource = ''): void {
-    this.resetValidation();
+    this.resetHoursValidation();
     this._store.dispatch(this._timepickerActions.changeHours({ step, source }));
   }
 
   changeMinutes(step: number, source: TimeChangeSource = ''): void {
-    this.resetValidation();
+    this.resetMinutesValidation();
     this._store.dispatch(
       this._timepickerActions.changeMinutes({ step, source })
     );
   }
 
   changeSeconds(step: number, source: TimeChangeSource = ''): void {
-    this.resetValidation();
+    this.resetSecondsValidation();
     this._store.dispatch(
       this._timepickerActions.changeSeconds({ step, source })
     );
   }
 
   updateHours(target?: Partial<EventTarget> | null): void {
-    this.resetValidation();
+    this.resetHoursValidation();
     this.hours = (target as HTMLInputElement).value;
 
-    const isValid = isHourInputValid(this.hours, this.isPM()) && this.isValidLimit();
+    const isValid = isValueEmpty(this.hours) || (isHourInputValid(this.hours, this.isPM()) && this.isValidLimit());
 
     if (!isValid) {
       this.invalidHours = true;
@@ -247,10 +263,10 @@ export class TimepickerComponent
   }
 
   updateMinutes(target: Partial<EventTarget> | null) {
-    this.resetValidation();
+    this.resetMinutesValidation();
     this.minutes = (target as HTMLInputElement).value;
 
-    const isValid = isMinuteInputValid(this.minutes) && this.isValidLimit();
+    const isValid = isValueEmpty(this.minutes) || (isMinuteInputValid(this.minutes) && this.isValidLimit());
 
     if (!isValid) {
       this.invalidMinutes = true;
@@ -264,10 +280,10 @@ export class TimepickerComponent
   }
 
   updateSeconds(target: Partial<EventTarget> | null) {
-    this.resetValidation();
+    this.resetSecondsValidation();
     this.seconds = (target as HTMLInputElement).value;
 
-    const isValid = isSecondInputValid(this.seconds) && this.isValidLimit();
+    const isValid = isValueEmpty(this.seconds) || (isSecondInputValid(this.seconds) && this.isValidLimit());
 
     if (!isValid) {
       this.invalidSeconds = true;
@@ -292,6 +308,14 @@ export class TimepickerComponent
   _updateTime() {
     const _seconds = this.showSeconds ? this.seconds : void 0;
     const _minutes = this.showMinutes ? this.minutes : void 0;
+
+    if (isInputEmpty(this.hours, _minutes, _seconds)) {
+      this.isValid.emit(true);
+      this.onChange(null);
+
+      return;
+    }
+
     if (!isInputValid(this.hours, _minutes, _seconds, this.isPM())) {
       this.isValid.emit(false);
       this.onChange(null);
